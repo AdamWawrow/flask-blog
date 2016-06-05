@@ -9,6 +9,10 @@ import sqlite3
 DATABASE = 'blog.db' 
 app = Flask(__name__) 
 
+USERNAME = 'admin'
+PASSWORD = 'admin'
+SECRET_KEY = '\xa2\xa9\xcd\x99p\xbd\xb4\xc4\xc2\x86z#T\x86\xf4x\x18\xfdm\x00\x16\xe8\x8bf'
+
 # pulls in app configuration by looking for UPPERCASE variables 
 app.config.from_object(__name__) 
 
@@ -16,9 +20,16 @@ app.config.from_object(__name__)
 def connect_db(): 
 	return sqlite3.connect(app.config['DATABASE']) 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def login():
-	return render_template('login.html')
+	error = None 
+	if request.method == 'POST': 
+		if request.form['username'] != app.config['USERNAME'] or request.form['password'] != app.config['PASSWORD']: 
+			error = 'Invalid Credentials. Please try again.' 
+		else: 
+			session['logged_in'] = True 
+			return redirect( url_for('main')) 
+	return render_template('login.html', error = error)
 
 @app.route('/main')
 def main():
